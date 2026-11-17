@@ -10,10 +10,6 @@ SPLIT_CSV = os.path.join(BASE, "split.csv")
 IMG_SIZE = (224, 224)
 EXT = (".jpg", ".jpeg", ".png")
 
-# RESNET
-MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
-STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
-
 
 def _gambar_valid(path):
     try:
@@ -67,8 +63,3 @@ def load_images(df, label2id, size=IMG_SIZE):
         X.append(np.array(img, dtype=np.uint8))
         y.append(label2id[label])
     return np.array(X), np.array(y)
-
-
-def normalisasi_resnet(X):
-    X = X.astype(np.float32) / 255.0
-    return (X - MEAN) / STD

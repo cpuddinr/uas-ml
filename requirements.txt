@@ -1,0 +1,8 @@
+streamlit
+pandas
+numpy
+pillow
+scikit-learn
+scikit-image
+joblib
+tensorflow==2.21.0

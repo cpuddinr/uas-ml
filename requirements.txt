@@ -6,3 +6,4 @@ scikit-learn
 scikit-image
 joblib
 tensorflow==2.21.0
+opencv-python

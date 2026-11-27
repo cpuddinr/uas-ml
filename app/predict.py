@@ -87,23 +87,28 @@ def _predict_fake(image, model_name, labels):
 
 #model asli
 def _glcm_features(image):
-    """Ekstraksi GLCM. HARUS sama dengan notebook 01_glcm_svm (jarak, sudut, properti)."""
-    from skimage.feature import graycomatrix, graycoprops
+    """
+    Fitur GLCM untuk SVM. Memakai notebooks/glcm_features.py, file yang SAMA dengan
+    yang dipakai notebook 01_glcm_svm saat training (120 fitur RGB), jadi tidak perlu
+    disamakan manual. Gambar di-resize BILINEAR 224x224 seperti data_utils.load_images.
+    """
+    if "glcm_mod" not in _cache:
+        import importlib.util
 
-    gray = np.array(image.convert("L").resize(IMG_SIZE), dtype=np.uint8)
-    glcm = graycomatrix(
-        gray,
-        distances=[1],
-        angles=[0, np.pi / 4, np.pi / 2, 3 * np.pi / 4],
-        levels=256,
-        symmetric=True,
-        normed=True,
-    )
-    props = ["contrast", "dissimilarity", "homogeneity", "energy", "correlation", "ASM"]
-    feats = []
-    for p in props:
-        feats.extend(graycoprops(glcm, p).flatten())
-    return np.array(feats, dtype=np.float64).reshape(1, -1)
+        path = BASE_DIR / "notebooks" / "glcm_features.py"
+        spec = importlib.util.spec_from_file_location("glcm_features", path)
+        mod = importlib.util.module_from_spec(spec)
+        try:
+            spec.loader.exec_module(mod)
+        except ModuleNotFoundError as e:
+            raise RuntimeError(
+                f"Fitur GLCM butuh library '{e.name}'. Jalankan: pip install opencv-python"
+            ) from e
+        _cache["glcm_mod"] = mod
+
+    img = image.convert("RGB").resize(IMG_SIZE, Image.BILINEAR)
+    feats = _cache["glcm_mod"].extract_features(np.array(img, dtype=np.uint8))
+    return feats.reshape(1, -1)
 
 
 def _softmax(x):
